@@ -1,16 +1,11 @@
 import { useState, useCallback, useMemo } from 'react'
-import { shuffle } from '../utils/shuffle'
+import { buildGrid } from '../utils/gridLayout'
 
 export function useGameLogic(wordData) {
-  const tiles = useMemo(() => {
-    const correct = wordData.syllables.map((syl, i) => ({ id: i, syl, isDecoy: false }))
-    const decoys = (wordData.decoys ?? []).map((syl, i) => ({
-      id: wordData.syllables.length + i,
-      syl,
-      isDecoy: true,
-    }))
-    return shuffle([...correct, ...decoys])
-  }, [wordData.id])
+  const { cells, cols, rows } = useMemo(
+    () => buildGrid(wordData),
+    [wordData.id]
+  )
 
   const [selected, setSelected] = useState([])
   const [result, setResult] = useState(null) // 'correct' | 'wrong' | null
@@ -43,7 +38,9 @@ export function useGameLogic(wordData) {
   }, [])
 
   return {
-    tiles,
+    cells,
+    cols,
+    rows,
     selected,
     result,
     hint1Visible,

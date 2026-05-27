@@ -10,21 +10,31 @@ import wordsData from './data/words.json'
 const words = wordsData.words
 
 export default function App() {
-  const { progress, completeLevel, earnBadge } = useProgress()
+  const { progress, completeLevel, earnBadge, resetProgress } = useProgress()
   const [screen, setScreen] = useState('home') // 'home' | 'game' | 'clear'
   const [pendingBadge, setPendingBadge] = useState(null)
   const [clearedWord, setClearedWord] = useState(null)
+  const [activeWord, setActiveWord] = useState(null)
 
   const currentWord = words.find((w) => w.level === progress.currentLevel) ?? null
   const isLast = !currentWord
 
   function handleStart() {
+    setActiveWord(currentWord)
     setScreen('game')
   }
 
+  function handleSelectLevel(level) {
+    const word = words.find((w) => w.level === level)
+    if (word) {
+      setActiveWord(word)
+      setScreen('game')
+    }
+  }
+
   function handleCorrect() {
-    const completedLevel = progress.currentLevel
-    setClearedWord(currentWord)
+    const completedLevel = activeWord.level
+    setClearedWord(activeWord)
     completeLevel(completedLevel)
 
     // 이번 레벨 클리어로 새 배지 조건 충족 여부 확인
@@ -42,7 +52,8 @@ export default function App() {
   }
 
   function handleNextLevel() {
-    setScreen('game')
+    setActiveWord(currentWord)
+    setScreen(currentWord ? 'game' : 'home')
   }
 
   function handleHome() {
@@ -55,12 +66,16 @@ export default function App() {
         <HomeScreen
           currentLevel={progress.currentLevel}
           badges={progress.badges}
+          isAllClear={isLast}
+          completedLevels={progress.completedLevels}
           onStart={handleStart}
+          onSelectLevel={handleSelectLevel}
+          onRestart={resetProgress}
         />
       )}
-      {screen === 'game' && currentWord && (
+      {screen === 'game' && activeWord && (
         <GameScreen
-          wordData={currentWord}
+          wordData={activeWord}
           earnedBadges={progress.badges}
           onCorrect={handleCorrect}
           onHome={handleHome}

@@ -39,5 +39,13 @@ export function useProgress() {
     })
   }, [])
 
-  return { progress, completeLevel, earnBadge }
+  const resetProgress = useCallback(() => {
+    setProgress((prev) => {
+      const next = { ...prev, currentLevel: 1 }
+      save(next)
+      return next
+    })
+  }, [])
+
+  return { progress, completeLevel, earnBadge, resetProgress }
 }

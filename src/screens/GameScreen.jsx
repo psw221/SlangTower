@@ -11,7 +11,8 @@ const ERA_LABEL = { '2000s': '2000년대', '2010s': '2010년대', '2020s': '2020
 
 export default function GameScreen({ wordData, earnedBadges, onCorrect, onHome }) {
   const {
-    tiles,
+    cells,
+    cols,
     selected,
     result,
     hint1Visible,
@@ -59,7 +60,8 @@ export default function GameScreen({ wordData, earnedBadges, onCorrect, onHome }
           <div className="h-px bg-gray-100" />
 
           <TileBoard
-            tiles={tiles}
+            cells={cells}
+            cols={cols}
             selected={selected}
             onSelect={selectTile}
             firstSylRevealed={firstSylRevealed}

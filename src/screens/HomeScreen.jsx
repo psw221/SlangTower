@@ -1,9 +1,34 @@
+import { useState, useRef } from 'react'
 import { BADGE_DEFS } from '../utils/badges'
 
-export default function HomeScreen({ currentLevel, badges = [], onStart }) {
+const ERA_COLOR = {
+  '2000s': 'bg-rose-400',
+  '2010s': 'bg-violet-400',
+  '2020s': 'bg-indigo-400',
+}
+
+import wordsData from '../data/words.json'
+const ALL_WORDS = wordsData.words
+
+export default function HomeScreen({ currentLevel, badges = [], isAllClear, completedLevels = [], onStart, onSelectLevel, onRestart }) {
   const earnedIds = new Set(badges.map((b) => b.id))
-  const totalLevels = 20
+  const completedSet = new Set(completedLevels)
+  const totalLevels = ALL_WORDS.length
   const pct = Math.round(((currentLevel - 1) / totalLevels) * 100)
+
+  const PAGE_SIZE = 10
+  const totalPages = Math.ceil(totalLevels / PAGE_SIZE)
+  const [page, setPage] = useState(0)
+  const pageWords = ALL_WORDS.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
+
+  const swipeStartX = useRef(null)
+  function handleTouchStart(e) { swipeStartX.current = e.touches[0].clientX }
+  function handleTouchEnd(e) {
+    if (swipeStartX.current === null) return
+    const dx = swipeStartX.current - e.changedTouches[0].clientX
+    if (Math.abs(dx) > 40) setPage((p) => Math.min(Math.max(p + (dx > 0 ? 1 : -1), 0), totalPages - 1))
+    swipeStartX.current = null
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50">
@@ -69,13 +94,82 @@ export default function HomeScreen({ currentLevel, badges = [], onStart }) {
           </div>
         </div>
 
-        {/* 시작 버튼 */}
-        <button
-          onClick={onStart}
-          className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-lg shadow-lg shadow-indigo-200 active:scale-[0.98] transition-all mt-1"
-        >
-          {currentLevel === 1 ? '게임 시작' : '이어하기'}
-        </button>
+        {/* 레벨 선택 */}
+        <div className="bg-white rounded-3xl shadow-sm p-5">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold text-gray-500">다시 풀기</p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+                className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 disabled:opacity-30 active:scale-95 transition-all text-xs"
+              >
+                ‹
+              </button>
+              <span className="text-xs text-gray-400">{page + 1} / {totalPages}</span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={page === totalPages - 1}
+                className="w-6 h-6 flex items-center justify-center rounded-full bg-gray-100 text-gray-400 disabled:opacity-30 active:scale-95 transition-all text-xs"
+              >
+                ›
+              </button>
+            </div>
+          </div>
+          <div
+            className="grid grid-cols-5 gap-2"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
+            {pageWords.map((w) => {
+              const done = completedSet.has(w.level)
+              return (
+                <button
+                  key={w.level}
+                  disabled={!done}
+                  onClick={() => onSelectLevel(w.level)}
+                  className={[
+                    'flex items-center justify-center rounded-xl h-10 font-bold text-sm transition-all active:scale-95',
+                    done
+                      ? `${ERA_COLOR[w.era] ?? 'bg-indigo-400'} text-white shadow-sm`
+                      : 'bg-gray-100 text-gray-300 cursor-not-allowed',
+                  ].join(' ')}
+                >
+                  {w.level}
+                </button>
+              )
+            })}
+          </div>
+          <div className="flex gap-3 mt-3 text-[10px] text-gray-400">
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-rose-400 inline-block" />2000s</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-violet-400 inline-block" />2010s</span>
+            <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-indigo-400 inline-block" />2020s</span>
+          </div>
+        </div>
+
+        {/* 시작 / 전체 클리어 버튼 영역 */}
+        {isAllClear ? (
+          <div className="flex flex-col gap-2.5 mt-1">
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-center">
+              <p className="text-2xl mb-1">👑</p>
+              <p className="text-sm font-bold text-amber-700">전체 클리어!</p>
+              <p className="text-xs text-amber-500 mt-0.5">모든 유행어를 정복했어요</p>
+            </div>
+            <button
+              onClick={onRestart}
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-lg shadow-lg shadow-indigo-200 active:scale-[0.98] transition-all"
+            >
+              처음부터 다시하기
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onStart}
+            className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-lg shadow-lg shadow-indigo-200 active:scale-[0.98] transition-all mt-1"
+          >
+            {currentLevel === 1 ? '게임 시작' : '이어하기'}
+          </button>
+        )}
       </div>
     </div>
   )
