@@ -8,90 +8,138 @@ import { checkBadge } from './utils/badges'
 import wordsData from './data/words.json'
 
 const words = wordsData.words
+const ERAS = ['2000s', '2010s', '2020s']
+const ERA_LABEL = { '2000s': '2000년대', '2010s': '2010년대', '2020s': '2020년대' }
+
+function getEraWords(era) {
+  return words
+    .filter((w) => w.era === era)
+    .sort((a, b) => a.syllables.length - b.syllables.length)
+}
+
+function getNextWord(era, completedIds) {
+  return getEraWords(era).find((w) => !completedIds.includes(w.id)) ?? null
+}
 
 export default function App() {
-  const { progress, completeLevel, earnBadge, resetProgress } = useProgress()
-  const [screen, setScreen] = useState('home') // 'home' | 'game' | 'clear'
+  const { progress, completeWord, earnBadge, resetProgress } = useProgress()
+  const [screen, setScreen] = useState('home')
   const [pendingBadge, setPendingBadge] = useState(null)
-  const [clearedWord, setClearedWord] = useState(null)
   const [activeWord, setActiveWord] = useState(null)
+  const [activeEra, setActiveEra] = useState(null)
+  const [clearState, setClearState] = useState(null) // { word, isEraClear, eraLabel, isLast }
 
-  const currentWord = words.find((w) => w.level === progress.currentLevel) ?? null
-  const isLast = !currentWord
+  const isAllClear = words.every((w) => progress.completedWordIds.includes(w.id))
 
-  function handleStart() {
-    setActiveWord(currentWord)
+  function handleStartEra(era) {
+    const word = getNextWord(era, progress.completedWordIds)
+    if (!word) return
+    setActiveEra(era)
+    setActiveWord(word)
     setScreen('game')
   }
 
-  function handleSelectLevel(level) {
-    const word = words.find((w) => w.level === level)
-    if (word) {
-      setActiveWord(word)
-      setScreen('game')
-    }
+  function handleSelectWord(wordId) {
+    const word = words.find((w) => w.id === wordId)
+    if (!word) return
+    setActiveEra(word.era)
+    setActiveWord(word)
+    setScreen('game')
   }
 
   function handleCorrect() {
-    const completedLevel = activeWord.level
-    setClearedWord(activeWord)
-    completeLevel(completedLevel)
+    const completedId = activeWord.id
+    const era = activeWord.era
 
-    // 이번 레벨 클리어로 새 배지 조건 충족 여부 확인
-    const badge = checkBadge(completedLevel)
+    // 완료 처리 (state 업데이트는 비동기이므로 로컬에서 계산)
+    const newCompletedIds = progress.completedWordIds.includes(completedId)
+      ? progress.completedWordIds
+      : [...progress.completedWordIds, completedId]
+
+    completeWord(completedId)
+
+    const eraWords = getEraWords(era)
+    const isEraClear = eraWords.every((w) => newCompletedIds.includes(w.id))
+    const allDone = words.every((w) => newCompletedIds.includes(w.id))
+
+    // 배지 확인
+    const badge = checkBadge(newCompletedIds, words)
     if (badge && !progress.badges.find((b) => b.id === badge.id)) {
       earnBadge(badge)
       setPendingBadge(badge)
     }
 
+    setClearState({
+      word: activeWord.word,
+      hint1: activeWord.hint1,
+      isEraClear,
+      eraLabel: ERA_LABEL[era] ?? era,
+      isLast: allDone,
+    })
     setScreen('clear')
   }
 
-  function handleBadgeConfirm() {
-    setPendingBadge(null)
-  }
-
-  function handleNextLevel() {
-    setActiveWord(currentWord)
-    setScreen(currentWord ? 'game' : 'home')
+  function handleNextInEra() {
+    const nextWord = getNextWord(activeEra, [
+      ...progress.completedWordIds,
+      // activeWord.id가 아직 state에 반영 안 됐을 수 있으므로 포함
+      activeWord.id,
+    ])
+    if (nextWord) {
+      setActiveWord(nextWord)
+      setScreen('game')
+    } else {
+      setScreen('home')
+    }
   }
 
   function handleHome() {
     setScreen('home')
   }
 
+  function handleBadgeConfirm() {
+    setPendingBadge(null)
+  }
+
+  // GameScreen에서 현재 단어가 era 내 몇 번째인지 계산
+  const eraWords = activeEra ? getEraWords(activeEra) : []
+  const posInEra = activeWord ? eraWords.findIndex((w) => w.id === activeWord.id) + 1 : 1
+  const totalInEra = eraWords.length
+
   return (
     <div className="max-w-md mx-auto min-h-screen">
       {screen === 'home' && (
         <HomeScreen
-          currentLevel={progress.currentLevel}
+          completedWordIds={progress.completedWordIds}
           badges={progress.badges}
-          isAllClear={isLast}
-          completedLevels={progress.completedLevels}
-          onStart={handleStart}
-          onSelectLevel={handleSelectLevel}
+          isAllClear={isAllClear}
+          onStartEra={handleStartEra}
+          onSelectWord={handleSelectWord}
           onRestart={resetProgress}
         />
       )}
       {screen === 'game' && activeWord && (
         <GameScreen
           wordData={activeWord}
+          posInEra={posInEra}
+          totalInEra={totalInEra}
           earnedBadges={progress.badges}
           onCorrect={handleCorrect}
           onHome={handleHome}
         />
       )}
-      {screen === 'clear' && (
+      {screen === 'clear' && clearState && (
         <ClearScreen
-          level={clearedWord?.level}
-          word={clearedWord?.word}
-          isLast={isLast}
-          onNext={handleNextLevel}
+          word={clearState.word}
+          hint1={clearState.hint1}
+          isEraClear={clearState.isEraClear}
+          eraLabel={clearState.eraLabel}
+          isLast={clearState.isLast}
+          onNext={handleNextInEra}
           onHome={handleHome}
         />
       )}
 
-      {/* 배지 획득 팝업 — 어느 화면 위에서나 표시 */}
       <BadgeModal badge={pendingBadge} onConfirm={handleBadgeConfirm} />
     </div>
   )

@@ -1,34 +1,46 @@
 export const BADGE_DEFS = [
   {
     id: 1,
-    level: 5,
-    name: '유행어 입문자',
-    icon: '🌱',
-    desc: 'Lv.5 클리어 — 2010년대 유행어를 알기 시작했어요',
+    era: '2000s',
+    name: '2000년대 마스터',
+    icon: '📼',
+    desc: '2000년대 유행어를 모두 정복했어요',
   },
   {
     id: 2,
-    level: 10,
-    name: '밈 중급자',
-    icon: '⚡',
-    desc: 'Lv.10 클리어 — 3글자 신조어도 척척 맞히는 실력',
+    era: '2010s',
+    name: '2010년대 마스터',
+    icon: '📱',
+    desc: '2010년대 신조어를 모두 꿰뚫고 있어요',
   },
   {
     id: 3,
-    level: 15,
-    name: '신조어 고인물',
-    icon: '🔥',
-    desc: 'Lv.15 클리어 — Gen Z 유행어를 완전히 꿰뚫고 있어요',
+    era: '2020s',
+    name: '2020년대 마스터',
+    icon: '🤳',
+    desc: 'Gen Z 유행어를 완전히 정복했어요',
   },
   {
     id: 4,
-    level: 20,
-    name: '슬랭타워 마스터',
+    era: null,
+    name: '슬랭 레전드',
     icon: '👑',
-    desc: 'Lv.20 클리어 — 모든 유행어를 정복한 전설',
+    desc: '모든 연대 유행어를 정복한 전설',
   },
 ]
 
-export function checkBadge(completedLevel) {
-  return BADGE_DEFS.find((b) => b.level === completedLevel) ?? null
+export function checkBadge(completedWordIds, allWords) {
+  const completedSet = new Set(completedWordIds)
+
+  for (const badge of BADGE_DEFS) {
+    if (badge.era === null) {
+      const allDone = allWords.every((w) => completedSet.has(w.id))
+      if (allDone) return badge
+    } else {
+      const eraWords = allWords.filter((w) => w.era === badge.era)
+      const eraDone = eraWords.length > 0 && eraWords.every((w) => completedSet.has(w.id))
+      if (eraDone) return badge
+    }
+  }
+  return null
 }

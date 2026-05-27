@@ -4,9 +4,18 @@ const STORAGE_KEY = 'slangtower_progress'
 
 function load() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) ?? { currentLevel: 1, completedLevels: [], badges: [] }
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY))
+    if (!raw) return { completedWordIds: [], badges: [] }
+
+    // 구 포맷 마이그레이션 (currentLevel 키가 있으면 구 포맷)
+    if ('currentLevel' in raw) {
+      const completedWordIds = raw.completedLevels ?? []
+      return { completedWordIds, badges: raw.badges ?? [] }
+    }
+
+    return raw
   } catch {
-    return { currentLevel: 1, completedLevels: [], badges: [] }
+    return { completedWordIds: [], badges: [] }
   }
 }
 
@@ -17,13 +26,10 @@ function save(data) {
 export function useProgress() {
   const [progress, setProgress] = useState(load)
 
-  const completeLevel = useCallback((level) => {
+  const completeWord = useCallback((wordId) => {
     setProgress((prev) => {
-      const completedLevels = prev.completedLevels.includes(level)
-        ? prev.completedLevels
-        : [...prev.completedLevels, level]
-      const currentLevel = Math.max(prev.currentLevel, level + 1)
-      const next = { ...prev, completedLevels, currentLevel }
+      if (prev.completedWordIds.includes(wordId)) return prev
+      const next = { ...prev, completedWordIds: [...prev.completedWordIds, wordId] }
       save(next)
       return next
     })
@@ -41,11 +47,11 @@ export function useProgress() {
 
   const resetProgress = useCallback(() => {
     setProgress((prev) => {
-      const next = { ...prev, currentLevel: 1 }
+      const next = { completedWordIds: [], badges: prev.badges }
       save(next)
       return next
     })
   }, [])
 
-  return { progress, completeLevel, earnBadge, resetProgress }
+  return { progress, completeWord, earnBadge, resetProgress }
 }

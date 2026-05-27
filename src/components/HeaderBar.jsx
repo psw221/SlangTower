@@ -1,12 +1,19 @@
 import { getDifficulty } from '../utils/difficulty'
 import { BADGE_DEFS } from '../utils/badges'
 
-export default function HeaderBar({ level, syllableCount, earnedBadges = [] }) {
+const ERA_GRADIENT = {
+  '2000s': 'bg-gradient-to-r from-rose-600 to-pink-500',
+  '2010s': 'bg-gradient-to-r from-violet-700 to-purple-500',
+  '2020s': 'bg-gradient-to-r from-indigo-700 to-blue-600',
+}
+
+export default function HeaderBar({ eraLabel, posInEra, totalInEra, syllableCount, earnedBadges = [], era }) {
   const diff = getDifficulty(syllableCount)
   const earnedIds = new Set(earnedBadges.map((b) => b.id))
+  const headerBg = ERA_GRADIENT[era] ?? 'bg-indigo-600'
 
   return (
-    <div className="flex items-center justify-between px-4 py-3 bg-indigo-600">
+    <div className={`flex items-center justify-between px-4 py-3 ${headerBg}`}>
       <span className="text-white font-extrabold tracking-tight">슬랭타워</span>
 
       <div className="flex items-center gap-2">
@@ -30,7 +37,9 @@ export default function HeaderBar({ level, syllableCount, earnedBadges = [] }) {
           </span>
         )}
 
-        <span className="text-white text-sm font-bold">Lv.{level}</span>
+        <span className="text-white text-xs font-bold bg-white/20 px-2 py-1 rounded-lg">
+          {posInEra}/{totalInEra}
+        </span>
       </div>
     </div>
   )

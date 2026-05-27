@@ -22,7 +22,7 @@ export default function ResultModal({ result, wordData, onNext, onRetry }) {
             onClick={onNext}
             className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-base shadow-md shadow-indigo-200 active:scale-95 transition-all"
           >
-            다음 레벨 →
+            다음 문제 →
           </button>
         ) : (
           <button
