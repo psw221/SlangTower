@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import HomeScreen from './screens/HomeScreen'
+import StageScreen from './screens/StageScreen'
 import GameScreen from './screens/GameScreen'
 import ClearScreen from './screens/ClearScreen'
 import BadgeModal from './components/BadgeModal'
@@ -23,7 +24,7 @@ function getNextWord(era, completedIds) {
 
 export default function App() {
   const { progress, completeWord, earnBadge, resetProgress } = useProgress()
-  const [screen, setScreen] = useState('home')
+  const [screen, setScreen] = useState('home') // 'home' | 'stage' | 'game' | 'clear'
   const [pendingBadge, setPendingBadge] = useState(null)
   const [activeWord, setActiveWord] = useState(null)
   const [activeEra, setActiveEra] = useState(null)
@@ -31,12 +32,9 @@ export default function App() {
 
   const isAllClear = words.every((w) => progress.completedWordIds.includes(w.id))
 
-  function handleStartEra(era) {
-    const word = getNextWord(era, progress.completedWordIds)
-    if (!word) return
+  function handleOpenStage(era) {
     setActiveEra(era)
-    setActiveWord(word)
-    setScreen('game')
+    setScreen('stage')
   }
 
   function handleSelectWord(wordId) {
@@ -63,7 +61,7 @@ export default function App() {
     const allDone = words.every((w) => newCompletedIds.includes(w.id))
 
     // 배지 확인
-    const badge = checkBadge(newCompletedIds, words)
+    const badge = checkBadge(newCompletedIds, words, progress.badges.map((b) => b.id))
     if (badge && !progress.badges.find((b) => b.id === badge.id)) {
       earnBadge(badge)
       setPendingBadge(badge)
@@ -113,9 +111,17 @@ export default function App() {
           completedWordIds={progress.completedWordIds}
           badges={progress.badges}
           isAllClear={isAllClear}
-          onStartEra={handleStartEra}
-          onSelectWord={handleSelectWord}
+          onOpenStage={handleOpenStage}
           onRestart={resetProgress}
+        />
+      )}
+      {screen === 'stage' && activeEra && (
+        <StageScreen
+          era={activeEra}
+          words={getEraWords(activeEra)}
+          completedWordIds={progress.completedWordIds}
+          onSelectWord={handleSelectWord}
+          onBack={() => setScreen('home')}
         />
       )}
       {screen === 'game' && activeWord && (

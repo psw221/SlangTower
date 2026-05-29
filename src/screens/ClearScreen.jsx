@@ -1,15 +1,15 @@
 export default function ClearScreen({ word, hint1, isEraClear, eraLabel, isLast, onNext, onHome }) {
   const title = isLast
-    ? '전체 클리어!'
+    ? '슬랭타워 정복!'
     : isEraClear
-    ? `${eraLabel} 클리어!`
-    : '정답!'
+    ? `${eraLabel} 정복!`
+    : '정복!'
 
   const subtitle = isLast
-    ? '모든 유행어를 정복했어요!'
+    ? '모든 유행어를 정복한 레전드!'
     : isEraClear
     ? `${eraLabel} 유행어를 모두 정복했어요!`
-    : '정답을 맞혔어요'
+    : '단어를 정복했어요'
 
   const emoji = isLast ? '👑' : isEraClear ? '🎊' : '🎉'
 
@@ -43,7 +43,7 @@ export default function ClearScreen({ word, hint1, isEraClear, eraLabel, isLast,
               onClick={onNext}
               className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-bold text-lg shadow-lg shadow-indigo-200 active:scale-[0.98] transition-all"
             >
-              {isEraClear ? '다음 스테이지 →' : '다음 문제 →'}
+              {isEraClear ? '다음 스테이지 →' : '다음 도전 →'}
             </button>
           )}
           <button

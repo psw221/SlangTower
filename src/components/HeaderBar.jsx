@@ -1,4 +1,4 @@
-import { getDifficulty } from '../utils/difficulty'
+import { getStars } from '../utils/difficulty'
 import { BADGE_DEFS } from '../utils/badges'
 
 const ERA_GRADIENT = {
@@ -8,7 +8,7 @@ const ERA_GRADIENT = {
 }
 
 export default function HeaderBar({ eraLabel, posInEra, totalInEra, syllableCount, earnedBadges = [], era }) {
-  const diff = getDifficulty(syllableCount)
+  const stars = getStars(syllableCount)
   const earnedIds = new Set(earnedBadges.map((b) => b.id))
   const headerBg = ERA_GRADIENT[era] ?? 'bg-indigo-600'
 
@@ -16,7 +16,7 @@ export default function HeaderBar({ eraLabel, posInEra, totalInEra, syllableCoun
     <div className={`flex items-center justify-between px-4 py-3 ${headerBg}`}>
       <span className="text-white font-extrabold tracking-tight">슬랭타워</span>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2.5">
         {/* 배지 아이콘들 */}
         <div className="flex gap-0.5">
           {BADGE_DEFS.map((b) => (
@@ -30,12 +30,12 @@ export default function HeaderBar({ eraLabel, posInEra, totalInEra, syllableCoun
           ))}
         </div>
 
-        {/* 난이도 뱃지 */}
-        {diff && (
-          <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${diff.color}`}>
-            {diff.label}
-          </span>
-        )}
+        {/* 난이도 별 */}
+        <div className="flex gap-0.5">
+          {Array.from({ length: 4 }).map((_, j) => (
+            <span key={j} className={`text-sm leading-none ${j < stars ? 'text-amber-300' : 'text-white/20'}`}>★</span>
+          ))}
+        </div>
 
         <span className="text-white text-xs font-bold bg-white/20 px-2 py-1 rounded-lg">
           {posInEra}/{totalInEra}

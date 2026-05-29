@@ -29,10 +29,12 @@ export const BADGE_DEFS = [
   },
 ]
 
-export function checkBadge(completedWordIds, allWords) {
+export function checkBadge(completedWordIds, allWords, earnedBadgeIds = []) {
   const completedSet = new Set(completedWordIds)
+  const earnedSet = new Set(earnedBadgeIds)
 
   for (const badge of BADGE_DEFS) {
+    if (earnedSet.has(badge.id)) continue
     if (badge.era === null) {
       const allDone = allWords.every((w) => completedSet.has(w.id))
       if (allDone) return badge
