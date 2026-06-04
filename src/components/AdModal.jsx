@@ -13,8 +13,8 @@ export default function AdModal({ onComplete, onClose }) {
   }, [done])
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50">
-      <div className="bg-white rounded-t-3xl w-full max-w-md pb-8 pt-5 px-5 shadow-2xl">
+    <div className="fixed inset-0 bg-black/50 flex items-end justify-center z-50 animate-fade-in">
+      <div className="bg-white rounded-t-3xl w-full max-w-md pb-8 pt-5 px-5 shadow-2xl animate-slide-up">
         {/* 핸들 바 */}
         <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-5" />
 

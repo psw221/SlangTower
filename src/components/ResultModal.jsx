@@ -4,8 +4,13 @@ export default function ResultModal({ result, wordData, onNext, onRetry }) {
   const isCorrect = result === 'correct'
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-6">
-      <div className="bg-white rounded-3xl p-7 w-full max-w-sm shadow-2xl text-center space-y-5">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-6 animate-fade-in">
+      <div
+        className={[
+          'bg-white rounded-3xl p-7 w-full max-w-sm shadow-2xl text-center space-y-5',
+          isCorrect ? 'animate-scale-in' : 'animate-shake',
+        ].join(' ')}
+      >
         <div className="text-6xl">{isCorrect ? '🎉' : '😅'}</div>
 
         <div className="space-y-1.5">

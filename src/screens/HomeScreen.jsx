@@ -85,7 +85,11 @@ export default function HomeScreen({ completedWordIds = [], badges = [], isAllCl
           const c = C[color]
 
           return (
-            <div key={key} className={`bg-white rounded-3xl shadow-sm overflow-hidden ${c.border}`}>
+            <div
+              key={key}
+              className={`bg-white rounded-3xl shadow-sm overflow-hidden animate-scale-in ${c.border}`}
+              style={{ animationDelay: `${ERAS.findIndex((e) => e.key === key) * 80}ms` }}
+            >
               <div className="p-5 flex flex-col gap-3">
                 {/* 카드 헤더 */}
                 <div className="flex items-center justify-between">

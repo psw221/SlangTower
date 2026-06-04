@@ -2,8 +2,8 @@ export default function BadgeModal({ badge, onConfirm }) {
   if (!badge) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-6">
-      <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl text-center space-y-5">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-6 animate-fade-in">
+      <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl text-center space-y-5 animate-pop-in">
         {/* 배지 아이콘 */}
         <div className="flex flex-col items-center gap-3">
           <div className="w-24 h-24 rounded-full bg-amber-50 ring-4 ring-amber-200 flex items-center justify-center">

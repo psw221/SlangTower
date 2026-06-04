@@ -105,7 +105,7 @@ export default function App() {
   const totalInEra = eraWords.length
 
   return (
-    <div className="max-w-md mx-auto min-h-screen">
+    <div className="max-w-md mx-auto min-h-screen bg-slate-50 shadow-2xl shadow-slate-300/50">
       {screen === 'home' && (
         <HomeScreen
           completedWordIds={progress.completedWordIds}

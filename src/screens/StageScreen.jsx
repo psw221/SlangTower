@@ -217,7 +217,7 @@ export default function StageScreen({ era, words, completedWordIds, onSelectWord
                 {/* 팝업 */}
                 {isSelected && (
                   <div
-                    className="absolute bg-white rounded-2xl shadow-2xl p-4 z-30"
+                    className="absolute bg-white rounded-2xl shadow-2xl p-4 z-30 animate-scale-in"
                     style={{ left: popupLeft, top: popupTop, width: POPUP_W }}
                     onClick={e => e.stopPropagation()}
                   >
